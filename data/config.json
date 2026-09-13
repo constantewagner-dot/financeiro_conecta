@@ -1,0 +1,8 @@
+{
+  "tiposContrato": [
+    "Mensal",
+    "Semestral",
+    "Anual",
+    "Por módulo"
+  ]
+}
