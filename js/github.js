@@ -11,7 +11,6 @@ const GH = {
     token: ''
   },
 
-  // --- Config (localStorage) ---
   getConfig() {
     const raw = localStorage.getItem(this.STORAGE_KEY);
     return raw ? { ...this.DEFAULTS, ...JSON.parse(raw) } : { ...this.DEFAULTS };
@@ -24,7 +23,6 @@ const GH = {
     return !!cfg.token && !!cfg.owner && !!cfg.repo;
   },
 
-  // --- API genérica ---
   async request(path, options = {}) {
     const cfg = this.getConfig();
     if (!cfg.token) throw new Error('Token do GitHub não configurado.');
@@ -41,8 +39,6 @@ const GH = {
     return res;
   },
 
-  // --- Leitura de arquivo JSON ---
-  // Retorna { data, sha } ou null se não existir
   async loadFile(filename) {
     const cfg = this.getConfig();
     const path = `${cfg.dataPath}/${filename}`;
@@ -51,18 +47,12 @@ const GH = {
     if (!res.ok) throw new Error(`Erro ao ler ${filename}: ${res.status}`);
     const json = await res.json();
     const content = atob(json.content.replace(/\n/g, ''));
-    return {
-      data: JSON.parse(content),
-      sha: json.sha
-    };
+    return { data: JSON.parse(content), sha: json.sha };
   },
 
-  // --- Escrita de arquivo JSON (cria ou atualiza) ---
   async saveFile(filename, data, message) {
     const cfg = this.getConfig();
     const path = `${cfg.dataPath}/${filename}`;
-
-    // Busca sha atual (se existir)
     let sha = null;
     const existing = await this.loadFile(filename);
     if (existing) sha = existing.sha;
@@ -87,26 +77,28 @@ const GH = {
     return { sha: json.content.sha };
   },
 
-  // --- Teste de conexão ---
   async testConnection() {
-    const cfg = this.getConfig();
     const res = await this.request('');
     if (!res.ok) throw new Error(`Repositório não acessível (${res.status}). Verifique token e permissões.`);
     return true;
   }
 };
 
-// Cache em memória para evitar múltiplas leituras
 const DB = {
-  _cache: {},   // filename -> { data, sha }
+  _cache: {},
   _files: ['alunos.json', 'matriculas.json', 'receber.json', 'pagar.json', 'categorias.json', 'config.json'],
   _defaults: {
     'alunos.json': [],
     'matriculas.json': [],
     'receber.json': [],
     'pagar.json': [],
-    'categorias.json': { receitas: ['Mensalidade'], despesas: ['Salários', 'Aluguel', 'Internet', 'Material', 'Impostos', 'Contabilidade'] },
-    'config.json': { tiposContrato: ['Mensal', 'Semestral', 'Anual', 'Por módulo'] }
+    'categorias.json': {
+      receitas: ['Mensalidade', 'Taxa de Material'],
+      despesas: ['Salários', 'Aluguel', 'Internet', 'Material', 'Impostos', 'Contabilidade']
+    },
+    'config.json': {
+      tiposContrato: ['Mensal', 'Semestral', 'Anual', 'Por módulo']
+    }
   },
 
   async loadAll() {
@@ -115,7 +107,6 @@ const DB = {
       if (loaded) {
         this._cache[f] = loaded;
       } else {
-        // cria com default
         const def = this._defaults[f];
         const saved = await GH.saveFile(f, def, `Cria ${f}`);
         this._cache[f] = { data: def, sha: saved.sha };
@@ -123,7 +114,9 @@ const DB = {
     }
   },
 
-  get(filename) { return this._cache[filename]?.data ?? this._defaults[filename]; },
+  get(filename) {
+    return this._cache[filename]?.data ?? JSON.parse(JSON.stringify(this._defaults[filename]));
+  },
 
   async set(filename, data, message) {
     const res = await GH.saveFile(filename, data, message);
