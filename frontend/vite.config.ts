@@ -4,6 +4,7 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  base: '/financeiro_conecta/', // ← Nome exato do repositório
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -11,5 +12,10 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    host: true,
+  },
+  build: {
+    outDir: 'dist',
+    copyPublicDir: true,
   },
 });

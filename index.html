@@ -2,13 +2,11 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="refresh" content="0; url=/financeiro_conecta/" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Financeiro Conecta - Sistema de gestão escolar e financeira" />
-    <meta http-equiv="refresh" content="0; url=/frontend/" />
     <title>Financeiro Conecta — Redirecionando...</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-
       body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         background: linear-gradient(135deg, #0284c7 0%, #0f172a 100%);
@@ -20,91 +18,41 @@
         text-align: center;
         padding: 24px;
       }
-
-      .container {
-        max-width: 560px;
-        width: 100%;
-      }
-
+      .container { max-width: 560px; width: 100%; }
       .logo {
-        width: 72px;
-        height: 72px;
+        width: 72px; height: 72px;
         background: #ffffff;
         border-radius: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         margin: 0 auto 20px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         animation: pulse 2s ease-in-out infinite;
       }
-
-      .logo svg {
-        width: 40px;
-        height: 40px;
-        color: #0284c7;
-      }
-
-      h1 {
-        font-size: 2rem;
-        font-weight: 800;
-        margin-bottom: 10px;
-      }
-
-      p {
-        font-size: 1rem;
-        color: #e0f2fe;
-        margin-bottom: 24px;
-      }
-
+      .logo svg { width: 40px; height: 40px; color: #0284c7; }
+      h1 { font-size: 2rem; font-weight: 800; margin-bottom: 10px; }
+      p { font-size: 1rem; color: #e0f2fe; margin-bottom: 24px; }
       .loader {
-        width: 48px;
-        height: 48px;
+        width: 48px; height: 48px;
         border: 4px solid rgba(255, 255, 255, 0.2);
         border-top-color: #ffffff;
         border-radius: 50%;
         margin: 0 auto 24px;
         animation: spin 1s linear infinite;
       }
-
       a.button {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
+        display: inline-flex; align-items: center; gap: 8px;
         padding: 12px 24px;
-        background: #ffffff;
-        color: #0284c7;
+        background: #ffffff; color: #0284c7;
         border-radius: 12px;
-        text-decoration: none;
-        font-weight: 600;
+        text-decoration: none; font-weight: 600;
         transition: all 0.2s ease;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
       }
-
-      a.button:hover {
-        transform: translateY(-2px);
-        background: #f0f9ff;
-      }
-
-      .fallback {
-        margin-top: 24px;
-        font-size: 0.875rem;
-        color: #bae6fd;
-      }
-
-      .fallback a {
-        color: #ffffff;
-        text-decoration: underline;
-      }
-
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-      }
+      a.button:hover { transform: translateY(-2px); background: #f0f9ff; }
+      .fallback { margin-top: 24px; font-size: 0.875rem; color: #bae6fd; }
+      .fallback a { color: #ffffff; text-decoration: underline; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
     </style>
   </head>
   <body>
@@ -114,58 +62,21 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.027 0-4.048.166-6.002.483V21" />
         </svg>
       </div>
-
       <h1>Financeiro Conecta</h1>
       <p>Redirecionando para o sistema...</p>
-
       <div class="loader"></div>
-
-      <a href="/frontend/" class="button">
+      <a href="/financeiro_conecta/" class="button">
         Acessar o Sistema
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
         </svg>
       </a>
-
       <div class="fallback">
-        <p>Se o redirecionamento não funcionar, <a href="/frontend/">clique aqui</a>.</p>
+        <p>Se o redirecionamento não funcionar, <a href="/financeiro_conecta/">clique aqui</a>.</p>
       </div>
     </div>
-
     <script>
-      // Detecta o ambiente e redireciona
-      (function () {
-        const hostname = window.location.hostname;
-        const port = window.location.port;
-
-        let destino;
-
-        // Desenvolvimento local (Vite)
-        if (hostname === 'localhost' || hostname === '127.0.0.1') {
-          if (port === '5173' || port === '3000') {
-            destino = '/';
-          } else if (port === '80' || port === '') {
-            destino = '/frontend/';
-          } else {
-            destino = '/frontend/';
-          }
-        }
-        // GitHub Pages
-        else if (hostname.endsWith('github.io')) {
-          // Mantém o path do repositório
-          const path = window.location.pathname.replace(/\/$/, '');
-          destino = path + '/frontend/';
-        }
-        // Produção / domínio próprio
-        else {
-          destino = '/frontend/';
-        }
-
-        // Redireciona via JS (mais rápido que meta refresh)
-        if (window.location.pathname !== destino) {
-          window.location.replace(destino);
-        }
-      })();
+      window.location.replace('/financeiro_conecta/');
     </script>
   </body>
 </html>

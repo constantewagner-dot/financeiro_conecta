@@ -1,5 +1,5 @@
 import { NavLink, Link } from 'react-router-dom';
-import { Building2, LayoutDashboard, Users, UserCircle, GraduationCap, School, ClipboardList, Wallet, ArrowDownCircle, ArrowUpCircle, Tags, Database } from 'lucide-react';
+import { Building2, LayoutDashboard, Users, UserCircle, GraduationCap, School, ClipboardList, ArrowDownCircle, ArrowUpCircle, Tags, Database } from 'lucide-react';
 
 const menu = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
