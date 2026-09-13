@@ -3,18 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Financeiro Conecta - Sistema de gestão escolar e financeira"
-    />
-    <meta name="theme-color" content="#0284c7" />
-    <title>Financeiro Conecta</title>
+    <meta name="description" content="Financeiro Conecta - Sistema de gestão escolar e financeira" />
+    <meta http-equiv="refresh" content="0; url=/frontend/" />
+    <title>Financeiro Conecta — Redirecionando...</title>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
 
       body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -22,7 +15,6 @@
         color: #ffffff;
         min-height: 100vh;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
         text-align: center;
@@ -30,204 +22,150 @@
       }
 
       .container {
-        max-width: 720px;
+        max-width: 560px;
         width: 100%;
       }
 
       .logo {
-        width: 80px;
-        height: 80px;
+        width: 72px;
+        height: 72px;
         background: #ffffff;
-        border-radius: 20px;
+        border-radius: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 24px;
+        margin: 0 auto 20px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        animation: pulse 2s ease-in-out infinite;
       }
 
       .logo svg {
-        width: 48px;
-        height: 48px;
+        width: 40px;
+        height: 40px;
         color: #0284c7;
       }
 
       h1 {
-        font-size: 2.5rem;
+        font-size: 2rem;
         font-weight: 800;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
       }
 
       p {
-        font-size: 1.125rem;
+        font-size: 1rem;
         color: #e0f2fe;
-        margin-bottom: 32px;
-        line-height: 1.6;
+        margin-bottom: 24px;
       }
 
-      .buttons {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 16px;
-        justify-content: center;
+      .loader {
+        width: 48px;
+        height: 48px;
+        border: 4px solid rgba(255, 255, 255, 0.2);
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        margin: 0 auto 24px;
+        animation: spin 1s linear infinite;
       }
 
       a.button {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 14px 28px;
+        padding: 12px 24px;
+        background: #ffffff;
+        color: #0284c7;
         border-radius: 12px;
         text-decoration: none;
         font-weight: 600;
-        font-size: 1rem;
         transition: all 0.2s ease;
-      }
-
-      .button-primary {
-        background: #ffffff;
-        color: #0284c7;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
       }
 
-      .button-primary:hover {
-        background: #f0f9ff;
+      a.button:hover {
         transform: translateY(-2px);
+        background: #f0f9ff;
       }
 
-      .button-secondary {
-        background: rgba(255, 255, 255, 0.1);
+      .fallback {
+        margin-top: 24px;
+        font-size: 0.875rem;
+        color: #bae6fd;
+      }
+
+      .fallback a {
         color: #ffffff;
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        text-decoration: underline;
       }
 
-      .button-secondary:hover {
-        background: rgba(255, 255, 255, 0.2);
+      @keyframes spin {
+        to { transform: rotate(360deg); }
       }
 
-      .features {
-        margin-top: 48px;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 16px;
-      }
-
-      .feature {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 20px;
-        backdrop-filter: blur(4px);
-      }
-
-      .feature h3 {
-        font-size: 1rem;
-        margin-bottom: 6px;
-      }
-
-      .feature p {
-        font-size: 0.875rem;
-        color: #bae6fd;
-        margin: 0;
-      }
-
-      footer {
-        margin-top: 48px;
-        font-size: 0.875rem;
-        color: #bae6fd;
-      }
-
-      @media (max-width: 480px) {
-        h1 {
-          font-size: 1.75rem;
-        }
-
-        p {
-          font-size: 1rem;
-        }
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
       }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="logo">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.027 0-4.048.166-6.002.483V21"
-          />
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.027 0-4.048.166-6.002.483V21" />
         </svg>
       </div>
 
       <h1>Financeiro Conecta</h1>
-      <p>
-        Sistema completo de gestão escolar e financeira. Controle alunos,
-        turmas, mensalidades, contas a pagar e receber em um só lugar.
-      </p>
+      <p>Redirecionando para o sistema...</p>
 
-      <div class="buttons">
-        <a href="/frontend/" class="button button-primary">
-          Acessar o Sistema
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
-            />
-          </svg>
-        </a>
-        <a
-          href="https://github.com/seu-usuario/Financeiro-Conecta"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button button-secondary"
-        >
-          Ver no GitHub
-        </a>
+      <div class="loader"></div>
+
+      <a href="/frontend/" class="button">
+        Acessar o Sistema
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+        </svg>
+      </a>
+
+      <div class="fallback">
+        <p>Se o redirecionamento não funcionar, <a href="/frontend/">clique aqui</a>.</p>
       </div>
-
-      <div class="features">
-        <div class="feature">
-          <h3>📚 Acadêmico</h3>
-          <p>Alunos, turmas e matrículas</p>
-        </div>
-        <div class="feature">
-          <h3>💰 Financeiro</h3>
-          <p>Contas e categorias</p>
-        </div>
-        <div class="feature">
-          <h3>📊 Dashboard</h3>
-          <p>Resumo em tempo real</p>
-        </div>
-        <div class="feature">
-          <h3>📦 Backup</h3>
-          <p>Exporte seus dados</p>
-        </div>
-      </div>
-
-      <footer>
-        &copy; <span id="ano"></span> Financeiro Conecta. Todos os direitos
-        reservados.
-      </footer>
     </div>
 
     <script>
-      document.getElementById('ano').textContent = new Date().getFullYear();
+      // Detecta o ambiente e redireciona
+      (function () {
+        const hostname = window.location.hostname;
+        const port = window.location.port;
+
+        let destino;
+
+        // Desenvolvimento local (Vite)
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          if (port === '5173' || port === '3000') {
+            destino = '/';
+          } else if (port === '80' || port === '') {
+            destino = '/frontend/';
+          } else {
+            destino = '/frontend/';
+          }
+        }
+        // GitHub Pages
+        else if (hostname.endsWith('github.io')) {
+          // Mantém o path do repositório
+          const path = window.location.pathname.replace(/\/$/, '');
+          destino = path + '/frontend/';
+        }
+        // Produção / domínio próprio
+        else {
+          destino = '/frontend/';
+        }
+
+        // Redireciona via JS (mais rápido que meta refresh)
+        if (window.location.pathname !== destino) {
+          window.location.replace(destino);
+        }
+      })();
     </script>
   </body>
 </html>
