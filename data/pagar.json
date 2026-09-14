@@ -8,106 +8,10 @@
     "status": "pendente"
   },
   {
-    "id": "pg1789346670045",
+    "id": "pg1789346814332",
     "descricao": "INSS",
     "categoria": "Impostos",
-    "valor": 118,
-    "vencimento": "2026-09-18",
-    "status": "pendente"
-  },
-  {
-    "id": "pg1789346685083",
-    "descricao": "INSS",
-    "categoria": "Impostos",
-    "valor": 118,
-    "vencimento": "2026-09-18",
-    "status": "pendente"
-  },
-  {
-    "id": "pg1789346688439",
-    "descricao": "INSS",
-    "categoria": "Impostos",
-    "valor": 118,
-    "vencimento": "2026-09-18",
-    "status": "pendente"
-  },
-  {
-    "id": "pg1789346692981",
-    "descricao": "INSS",
-    "categoria": "Impostos",
-    "valor": 118,
-    "vencimento": "2026-09-18",
-    "status": "pendente"
-  },
-  {
-    "id": "pg1789346693757",
-    "descricao": "INSS",
-    "categoria": "Impostos",
-    "valor": 118,
-    "vencimento": "2026-09-18",
-    "status": "pendente"
-  },
-  {
-    "id": "pg1789346695815",
-    "descricao": "INSS",
-    "categoria": "Impostos",
-    "valor": 118,
-    "vencimento": "2026-09-18",
-    "status": "pendente"
-  },
-  {
-    "id": "pg1789346696077",
-    "descricao": "INSS",
-    "categoria": "Impostos",
-    "valor": 118,
-    "vencimento": "2026-09-18",
-    "status": "pendente"
-  },
-  {
-    "id": "pg1789346696282",
-    "descricao": "INSS",
-    "categoria": "Impostos",
-    "valor": 118,
-    "vencimento": "2026-09-18",
-    "status": "pendente"
-  },
-  {
-    "id": "pg1789346696487",
-    "descricao": "INSS",
-    "categoria": "Impostos",
-    "valor": 118,
-    "vencimento": "2026-09-18",
-    "status": "pendente"
-  },
-  {
-    "id": "pg1789346696686",
-    "descricao": "INSS",
-    "categoria": "Impostos",
-    "valor": 118,
-    "vencimento": "2026-09-18",
-    "status": "pendente"
-  },
-  {
-    "id": "pg1789346696892",
-    "descricao": "INSS",
-    "categoria": "Impostos",
-    "valor": 118,
-    "vencimento": "2026-09-18",
-    "status": "pendente"
-  },
-  {
-    "id": "pg1789346697118",
-    "descricao": "INSS",
-    "categoria": "Impostos",
-    "valor": 118,
-    "vencimento": "2026-09-18",
-    "status": "pendente"
-  },
-  {
-    "id": "pg1789346737137",
-    "descricao": "INSS",
-    "categoria": "Impostos",
-    "valor": 118,
+    "valor": 150,
     "vencimento": "2026-09-18",
     "status": "pendente"
   }
