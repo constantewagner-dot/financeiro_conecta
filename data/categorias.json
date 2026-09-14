@@ -3,11 +3,11 @@
     "Mensalidade"
   ],
   "despesas": [
-    "Salários",
     "Aluguel",
     "Internet",
     "Material",
     "Impostos",
-    "Contabilidade"
+    "Contabilidade",
+    "Salarios"
   ]
 }
