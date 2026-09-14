@@ -5,7 +5,8 @@
     "categoria": "Impostos",
     "valor": 112,
     "vencimento": "0026-09-18",
-    "status": "pendente"
+    "status": "pago",
+    "dataPagamento": "2026-09-13"
   },
   {
     "id": "pg1789346814332",
