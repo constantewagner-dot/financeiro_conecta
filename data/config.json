@@ -4,5 +4,10 @@
     "Semestral",
     "Anual",
     "Por modulo"
+  ],
+  "modalidades": [
+    "Infantil",
+    "Longevidade",
+    "Educacional"
   ]
 }
