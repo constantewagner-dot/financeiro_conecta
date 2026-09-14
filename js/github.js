@@ -97,7 +97,8 @@ const DB = {
       despesas: ['Salários', 'Aluguel', 'Internet', 'Material', 'Impostos', 'Contabilidade']
     },
     'config.json': {
-      tiposContrato: ['Mensal', 'Semestral', 'Anual', 'Por módulo']
+      tiposContrato: ['Mensal', 'Semestral', 'Anual', 'Por módulo'],
+      modalidades: ['Musicalização', 'Ballet', 'Violão', 'Piano', 'Canto']
     }
   },
 
