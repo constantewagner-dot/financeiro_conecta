@@ -7,7 +7,8 @@
     "parcela": 1,
     "vencimento": "2026-09-10",
     "valor": 150,
-    "status": "pendente"
+    "status": "pago",
+    "dataRecebimento": "2026-09-13"
   },
   {
     "id": "r17893451218262",
