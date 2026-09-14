@@ -1,1 +1,162 @@
-[]
+[
+  {
+    "id": "r17893451218261",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "mensalidade",
+    "parcela": 1,
+    "vencimento": "2026-09-10",
+    "valor": 150,
+    "status": "pendente"
+  },
+  {
+    "id": "r17893451218262",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "mensalidade",
+    "parcela": 2,
+    "vencimento": "2026-10-10",
+    "valor": 150,
+    "status": "pendente"
+  },
+  {
+    "id": "r17893451218263",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "mensalidade",
+    "parcela": 3,
+    "vencimento": "2026-11-10",
+    "valor": 150,
+    "status": "pendente"
+  },
+  {
+    "id": "r17893451218264",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "mensalidade",
+    "parcela": 4,
+    "vencimento": "2026-12-10",
+    "valor": 150,
+    "status": "pendente"
+  },
+  {
+    "id": "r17893451218265",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "mensalidade",
+    "parcela": 5,
+    "vencimento": "2027-01-10",
+    "valor": 150,
+    "status": "pendente"
+  },
+  {
+    "id": "r17893451218266",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "mensalidade",
+    "parcela": 6,
+    "vencimento": "2027-02-10",
+    "valor": 150,
+    "status": "pendente"
+  },
+  {
+    "id": "r17893451218267",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "mensalidade",
+    "parcela": 7,
+    "vencimento": "2027-03-10",
+    "valor": 150,
+    "status": "pendente"
+  },
+  {
+    "id": "r17893451218268",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "mensalidade",
+    "parcela": 8,
+    "vencimento": "2027-04-10",
+    "valor": 150,
+    "status": "pendente"
+  },
+  {
+    "id": "r17893451218269",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "mensalidade",
+    "parcela": 9,
+    "vencimento": "2027-05-10",
+    "valor": 150,
+    "status": "pendente"
+  },
+  {
+    "id": "r178934512182610",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "mensalidade",
+    "parcela": 10,
+    "vencimento": "2027-06-10",
+    "valor": 150,
+    "status": "pendente"
+  },
+  {
+    "id": "r178934512182611",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "mensalidade",
+    "parcela": 11,
+    "vencimento": "2027-07-10",
+    "valor": 150,
+    "status": "pendente"
+  },
+  {
+    "id": "r178934512182612",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "mensalidade",
+    "parcela": 12,
+    "vencimento": "2027-08-10",
+    "valor": 150,
+    "status": "pendente"
+  },
+  {
+    "id": "r1789345121826m1",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "material",
+    "parcela": 1,
+    "vencimento": "2026-09-10",
+    "valor": 62.5,
+    "status": "pendente"
+  },
+  {
+    "id": "r1789345121826m2",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "material",
+    "parcela": 2,
+    "vencimento": "2026-10-10",
+    "valor": 62.5,
+    "status": "pendente"
+  },
+  {
+    "id": "r1789345121826m3",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "material",
+    "parcela": 3,
+    "vencimento": "2026-11-10",
+    "valor": 62.5,
+    "status": "pendente"
+  },
+  {
+    "id": "r1789345121826m4",
+    "matriculaId": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "material",
+    "parcela": 4,
+    "vencimento": "2026-12-10",
+    "valor": 62.5,
+    "status": "pendente"
+  }
+]
