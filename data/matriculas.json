@@ -14,5 +14,21 @@
       "valorTotal": 250,
       "parcelas": 4
     }
+  },
+  {
+    "id": "m1789347503259",
+    "alunoId": "a1789344933667",
+    "tipo": "Mensal",
+    "inicio": "2026-09-30",
+    "termino": "2026-09-30",
+    "valorMensal": 50,
+    "desconto": 0,
+    "bolsa": 0,
+    "parcelasMensalidade": 1,
+    "diaVencimento": 28,
+    "material": {
+      "valorTotal": 0,
+      "parcelas": 1
+    }
   }
 ]
