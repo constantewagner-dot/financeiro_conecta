@@ -30,5 +30,22 @@
       "valorTotal": 0,
       "parcelas": 1
     }
+  },
+  {
+    "id": "mmu0kw2iw8a2go",
+    "alunoId": "amu0kuxuadj3f6",
+    "modalidade": "Infantil",
+    "tipo": "Semestral",
+    "inicio": "2026-09-14",
+    "termino": "2027-02-17",
+    "valorMensal": 250,
+    "desconto": 0,
+    "bolsa": 0,
+    "parcelasMensalidade": 6,
+    "diaVencimento": 10,
+    "material": {
+      "valorTotal": 300,
+      "parcelas": 3
+    }
   }
 ]
