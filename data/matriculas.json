@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": "m1789345121826",
+    "alunoId": "a1789344933667",
+    "tipo": "Anual",
+    "inicio": "2026-09-15",
+    "termino": "2027-09-15",
+    "valorMensal": 150,
+    "desconto": 0,
+    "bolsa": 0,
+    "parcelasMensalidade": 12,
+    "diaVencimento": 10,
+    "material": {
+      "valorTotal": 250,
+      "parcelas": 4
+    }
+  }
+]
