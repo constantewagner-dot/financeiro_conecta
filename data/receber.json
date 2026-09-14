@@ -169,5 +169,95 @@
     "vencimento": "2026-09-28",
     "valor": 50,
     "status": "pendente"
+  },
+  {
+    "id": "rmu0kw3o60brht",
+    "matriculaId": "mmu0kw2iw8a2go",
+    "alunoId": "amu0kuxuadj3f6",
+    "tipo": "mensalidade",
+    "parcela": 1,
+    "vencimento": "2026-09-10",
+    "valor": 250,
+    "status": "pendente"
+  },
+  {
+    "id": "rmu0kw3o6vi04j",
+    "matriculaId": "mmu0kw2iw8a2go",
+    "alunoId": "amu0kuxuadj3f6",
+    "tipo": "mensalidade",
+    "parcela": 2,
+    "vencimento": "2026-10-10",
+    "valor": 250,
+    "status": "pendente"
+  },
+  {
+    "id": "rmu0kw3o6znmv9",
+    "matriculaId": "mmu0kw2iw8a2go",
+    "alunoId": "amu0kuxuadj3f6",
+    "tipo": "mensalidade",
+    "parcela": 3,
+    "vencimento": "2026-11-10",
+    "valor": 250,
+    "status": "pendente"
+  },
+  {
+    "id": "rmu0kw3o6gfn76",
+    "matriculaId": "mmu0kw2iw8a2go",
+    "alunoId": "amu0kuxuadj3f6",
+    "tipo": "mensalidade",
+    "parcela": 4,
+    "vencimento": "2026-12-10",
+    "valor": 250,
+    "status": "pendente"
+  },
+  {
+    "id": "rmu0kw3o6q4h8n",
+    "matriculaId": "mmu0kw2iw8a2go",
+    "alunoId": "amu0kuxuadj3f6",
+    "tipo": "mensalidade",
+    "parcela": 5,
+    "vencimento": "2027-01-10",
+    "valor": 250,
+    "status": "pendente"
+  },
+  {
+    "id": "rmu0kw3o60pmgi",
+    "matriculaId": "mmu0kw2iw8a2go",
+    "alunoId": "amu0kuxuadj3f6",
+    "tipo": "mensalidade",
+    "parcela": 6,
+    "vencimento": "2027-02-10",
+    "valor": 250,
+    "status": "pendente"
+  },
+  {
+    "id": "rmu0kw3o6lg7sv",
+    "matriculaId": "mmu0kw2iw8a2go",
+    "alunoId": "amu0kuxuadj3f6",
+    "tipo": "material",
+    "parcela": 1,
+    "vencimento": "2026-09-10",
+    "valor": 100,
+    "status": "pendente"
+  },
+  {
+    "id": "rmu0kw3o6x80pp",
+    "matriculaId": "mmu0kw2iw8a2go",
+    "alunoId": "amu0kuxuadj3f6",
+    "tipo": "material",
+    "parcela": 2,
+    "vencimento": "2026-10-10",
+    "valor": 100,
+    "status": "pendente"
+  },
+  {
+    "id": "rmu0kw3o6uacfb",
+    "matriculaId": "mmu0kw2iw8a2go",
+    "alunoId": "amu0kuxuadj3f6",
+    "tipo": "material",
+    "parcela": 3,
+    "vencimento": "2026-11-10",
+    "valor": 100,
+    "status": "pendente"
   }
 ]
