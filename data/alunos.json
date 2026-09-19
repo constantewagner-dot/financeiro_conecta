@@ -40,12 +40,13 @@
   },
   {
     "id": "amu2oh7z732agi",
-    "nome": "HeloÃ­sa Hebel Chaves",
+    "codigo": "ALU-0003",
+    "nome": "Heloi­sa Hebel Chaves",
     "email": "hebeldenize@yahoo.com.br",
     "telefone1": "49999108894",
     "telefone2": "49991324168",
     "autorizado": {
-      "nome": "Somente pai e mÃ£e",
+      "nome": "Somente pai e mae",
       "telefone": ""
     },
     "responsavel": {
