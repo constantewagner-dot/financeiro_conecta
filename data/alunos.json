@@ -1,9 +1,23 @@
 [
   {
     "id": "a1789344933667",
+    "codigo": "ALU-0001",
     "nome": "Heloisa Hebel Chaves",
-    "telefone": "49999108894",
-    "email": "hebeldenize@yahoo.com.br"
+    "email": "hebeldenize@yahoo.com.br",
+    "telefone1": "49999108894",
+    "telefone2": "",
+    "autorizado": {
+      "nome": "Wagner",
+      "telefone": ""
+    },
+    "responsavel": {
+      "nome": "",
+      "parentesco": "Pai",
+      "cpf": "",
+      "telefone": "",
+      "email": "",
+      "endereco": ""
+    }
   },
   {
     "id": "amu0kuxuadj3f6",
@@ -12,7 +26,7 @@
     "telefone1": "",
     "telefone2": "",
     "autorizado": {
-      "nome": "JoÃ£o",
+      "nome": "JoÃÂ£o",
       "telefone": ""
     },
     "responsavel": {
@@ -26,12 +40,12 @@
   },
   {
     "id": "amu2oh7z732agi",
-    "nome": "Heloísa Hebel Chaves",
+    "nome": "HeloÃ­sa Hebel Chaves",
     "email": "hebeldenize@yahoo.com.br",
     "telefone1": "49999108894",
     "telefone2": "49991324168",
     "autorizado": {
-      "nome": "Somente pai e mãe",
+      "nome": "Somente pai e mÃ£e",
       "telefone": ""
     },
     "responsavel": {
@@ -40,7 +54,7 @@
       "cpf": "03199923909",
       "telefone": "49999108894",
       "email": "hebeldenize@yahoo.com.br",
-      "endereco": "São Jose, 118"
+      "endereco": "SÃ£o Jose, 118"
     }
   }
 ]
