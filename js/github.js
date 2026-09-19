@@ -1,5 +1,4 @@
 // github.js — leitura/escrita de arquivos JSON no GitHub via API REST
-// Token e config ficam no localStorage (configurados na aba Configurações)
 
 const GH = {
   STORAGE_KEY: 'fc_github_config',
@@ -86,12 +85,17 @@ const GH = {
 
 const DB = {
   _cache: {},
-  _files: ['alunos.json', 'matriculas.json', 'receber.json', 'pagar.json', 'categorias.json', 'config.json'],
+  _files: [
+    'alunos.json', 'matriculas.json', 'receber.json', 'pagar.json',
+    'categorias.json', 'config.json', 'fornecedores.json', 'colaboradores.json'
+  ],
   _defaults: {
     'alunos.json': [],
     'matriculas.json': [],
     'receber.json': [],
     'pagar.json': [],
+    'fornecedores.json': [],
+    'colaboradores.json': [],
     'categorias.json': {
       receitas: ['Mensalidade', 'Taxa de Material'],
       despesas: ['Salários', 'Aluguel', 'Internet', 'Material', 'Impostos', 'Contabilidade']

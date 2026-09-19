@@ -1,5 +1,5 @@
 // ============================================================
-// app.js — Financeiro Conecta (versão com aba Alunos e filtros)
+// app.js — Financeiro Conecta (com Cadastros, baixa parcial e recibo PDF)
 // ============================================================
 
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -7,6 +7,7 @@ const PARENTESCOS = ['Pai','Mãe','Avô','Avó','Tio','Tia','Irmão','Irmã','Re
 const STATUS_OPTIONS = [
   { v: '', t: 'Todos' },
   { v: 'pendente', t: 'Pendente' },
+  { v: 'parcial', t: 'Parcial' },
   { v: 'pago', t: 'Pago' },
   { v: 'atrasado', t: 'Atrasado' }
 ];
@@ -15,6 +16,8 @@ const App = {
   filtrosPagar: { descricao: '', categoria: '', mes: '', status: '' },
   filtrosReceber: { aluno: '', tipo: '', mes: '', status: '' },
   filtrosMatriculas: { aluno: '', responsavel: '', tipo: '' },
+  cadastroTipo: 'fornecedores',
+  _pagamentoR: null,
 
   async init() {
     this.bindTabs();
@@ -60,8 +63,24 @@ const App = {
     this.renderReceber();
     this.renderAlunos();
     this.renderMatriculas();
+    this.renderCadastros();
     this.renderRelatorios();
     this.renderConfig(true);
+  },
+
+  // ==================== MODAL ====================
+  abrirModal(html, grande = false) {
+    this.fecharModal();
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'modal-overlay';
+    overlay.innerHTML = `<div class="modal ${grande ? 'modal-grande' : ''}">${html}</div>`;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) this.fecharModal(); });
+    document.body.appendChild(overlay);
+  },
+  fecharModal() {
+    const overlay = document.getElementById('modal-overlay');
+    if (overlay) overlay.remove();
   },
 
   // ==================== DASHBOARD ====================
@@ -70,12 +89,11 @@ const App = {
     const matriculas = DB.get('matriculas.json');
     const alunos = DB.get('alunos.json');
     const receber = DB.get('receber.json');
-    const pagar = DB.get('pagar.json');
 
     const contratosProximos = matriculas.filter(m => m.termino && diasAte(m.termino) >= 0 && diasAte(m.termino) <= 30);
     const atrasados = receber.filter(r => statusEfetivo(r) === 'atrasado');
     const ativos = matriculas.filter(m => m.termino >= hoje).length;
-    const totalAtrasadoReceber = atrasados.reduce((s, r) => s + r.valor, 0);
+    const totalAtrasadoReceber = atrasados.reduce((s, r) => s + (r.valor - valorPagoDe(r)), 0);
 
     const sec = document.getElementById('tab-dashboard');
     sec.innerHTML = `
@@ -107,6 +125,7 @@ const App = {
     const sec = document.getElementById('tab-pagar');
     const pagar = DB.get('pagar.json');
     const categorias = DB.get('categorias.json').despesas || [];
+    const fornecedores = DB.get('fornecedores.json');
     const mesesFiltro = mesesDisponiveis(pagar);
     const f = this.filtrosPagar;
 
@@ -118,6 +137,12 @@ const App = {
           <label>Descrição <input id="pagar-desc" placeholder="Ex: Aluguel de setembro" /></label>
           <label>Categoria
             <select id="pagar-cat">${categorias.map(c => `<option>${esc(c)}</option>`).join('')}</select>
+          </label>
+          <label>Fornecedor
+            <select id="pagar-forn">
+              <option value="">Nenhum</option>
+              ${fornecedores.map(fn => `<option value="${fn.id}">${esc(fn.nome)}</option>`).join('')}
+            </select>
           </label>
         </div>
         <div class="form-row">
@@ -168,6 +193,7 @@ const App = {
 
   renderPagarLista() {
     const f = this.filtrosPagar;
+    const fornecedores = DB.get('fornecedores.json');
     let lista = DB.get('pagar.json').slice().sort((a, b) => (a.vencimento || '').localeCompare(b.vencimento || ''));
 
     if (f.descricao) lista = lista.filter(p => (p.descricao || '').toLowerCase().includes(f.descricao.toLowerCase()));
@@ -177,7 +203,6 @@ const App = {
 
     const el = document.getElementById('pagar-lista');
     if (!el) return;
-
     if (lista.length === 0) { el.innerHTML = '<p class="text-muted">Nenhuma conta encontrada.</p>'; return; }
 
     const total = lista.reduce((s, p) => s + p.valor, 0);
@@ -187,21 +212,25 @@ const App = {
         <div class="item"><strong>R$ ${numero(total)}</strong><span>Total</span></div>
       </div>
       <table>
-        <thead><tr><th>Descrição</th><th>Categoria</th><th>Vencimento</th><th>Parcela</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+        <thead><tr><th>Descrição</th><th>Categoria</th><th>Fornecedor</th><th>Vencimento</th><th>Parcela</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
         <tbody>
-          ${lista.map(p => `<tr>
-            <td>${esc(p.descricao)}</td>
-            <td>${esc(p.categoria || '—')}</td>
-            <td>${formatDate(p.vencimento)}</td>
-            <td>${p.totalParcelas > 1 ? `${p.parcela}/${p.totalParcelas}` : '—'}</td>
-            <td>R$ ${numero(p.valor)}</td>
-            <td>${statusBadge(statusEfetivo(p))}</td>
-            <td class="acoes">
-              ${statusEfetivo(p) !== 'pago' ? `<button class="secondary" onclick="App.pagarConta('${p.id}')">Pagar</button>` : ''}
-              <button class="secondary" onclick="App.editarPagar('${p.id}')">Editar</button>
-              <button class="secondary" onclick="App.excluirPagar('${p.id}')">Excluir</button>
-            </td>
-          </tr>`).join('')}
+          ${lista.map(p => {
+            const forn = fornecedores.find(x => x.id === p.fornecedorId);
+            return `<tr>
+              <td>${esc(p.descricao)}</td>
+              <td>${esc(p.categoria || '—')}</td>
+              <td>${esc(forn?.nome || '—')}</td>
+              <td>${formatDate(p.vencimento)}</td>
+              <td>${p.totalParcelas > 1 ? `${p.parcela}/${p.totalParcelas}` : '—'}</td>
+              <td>R$ ${numero(p.valor)}</td>
+              <td>${statusBadge(statusEfetivo(p))}</td>
+              <td class="acoes">
+                ${statusEfetivo(p) !== 'pago' ? `<button class="secondary" onclick="App.pagarConta('${p.id}')">Pagar</button>` : ''}
+                <button class="secondary" onclick="App.editarPagar('${p.id}')">Editar</button>
+                <button class="secondary" onclick="App.excluirPagar('${p.id}')">Excluir</button>
+              </td>
+            </tr>`;
+          }).join('')}
         </tbody>
       </table>
     `;
@@ -211,6 +240,7 @@ const App = {
     const id = document.getElementById('pagar-id').value;
     const descricao = document.getElementById('pagar-desc').value.trim();
     const categoria = document.getElementById('pagar-cat').value;
+    const fornecedorId = document.getElementById('pagar-forn').value;
     const valor = parseFloat(document.getElementById('pagar-valor').value);
     const vencimento = document.getElementById('pagar-venc').value;
     const parcelas = parseInt(document.getElementById('pagar-parcelas').value) || 1;
@@ -218,13 +248,13 @@ const App = {
     if (!descricao || !valor || !vencimento) { this.setStatus('Preencha descrição, valor e vencimento.', 'warn'); return; }
 
     const pagar = DB.get('pagar.json');
-
     try {
       if (id) {
         const i = pagar.findIndex(p => p.id === id);
         if (i === -1) return;
         pagar[i].descricao = descricao;
         pagar[i].categoria = categoria;
+        pagar[i].fornecedorId = fornecedorId || null;
         pagar[i].valor = valor;
         pagar[i].vencimento = vencimento;
         await DB.set('pagar.json', pagar, 'Edita conta a pagar');
@@ -233,15 +263,10 @@ const App = {
         const grupoId = uid('g');
         for (let p = 0; p < parcelas; p++) {
           pagar.push({
-            id: uid('pg'),
-            grupoId,
-            descricao,
-            categoria,
-            valor,
+            id: uid('pg'), grupoId, descricao, categoria,
+            fornecedorId: fornecedorId || null, valor,
             vencimento: addMeses(vencimento, p),
-            parcela: p + 1,
-            totalParcelas: parcelas,
-            status: 'pendente'
+            parcela: p + 1, totalParcelas: parcelas, status: 'pendente'
           });
         }
         await DB.set('pagar.json', pagar, 'Nova conta a pagar');
@@ -257,6 +282,7 @@ const App = {
     document.getElementById('pagar-id').value = p.id;
     document.getElementById('pagar-desc').value = p.descricao;
     document.getElementById('pagar-cat').value = p.categoria || '';
+    document.getElementById('pagar-forn').value = p.fornecedorId || '';
     document.getElementById('pagar-valor').value = p.valor;
     document.getElementById('pagar-venc').value = p.vencimento;
     const parcelasInput = document.getElementById('pagar-parcelas');
@@ -271,6 +297,7 @@ const App = {
     document.getElementById('pagar-id').value = '';
     document.getElementById('pagar-desc').value = '';
     document.getElementById('pagar-cat').value = '';
+    document.getElementById('pagar-forn').value = '';
     document.getElementById('pagar-valor').value = '';
     document.getElementById('pagar-venc').value = '';
     const parcelasInput = document.getElementById('pagar-parcelas');
@@ -364,7 +391,6 @@ const App = {
 
     const el = document.getElementById('receber-lista');
     if (!el) return;
-
     if (lista.length === 0) { el.innerHTML = '<p class="text-muted">Nenhuma cobrança encontrada.</p>'; return; }
 
     const total = lista.reduce((s, r) => s + r.valor, 0);
@@ -374,19 +400,24 @@ const App = {
         <div class="item"><strong>R$ ${numero(total)}</strong><span>Total</span></div>
       </div>
       <table>
-        <thead><tr><th>Aluno</th><th>Tipo</th><th>Parcela</th><th>Vencimento</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+        <thead><tr><th>Aluno</th><th>Tipo</th><th>Parcela</th><th>Vencimento</th><th>Valor</th><th>Recebido</th><th>Status</th><th>Ações</th></tr></thead>
         <tbody>
           ${lista.map(r => {
             const aluno = alunos.find(a => a.id === r.alunoId) || { nome: '—' };
+            const pago = valorPagoDe(r);
+            const saldo = r.valor - pago;
             return `<tr>
               <td>${esc(aluno.nome)}</td>
               <td>${r.tipo === 'material' ? 'Material' : 'Mensalidade'}</td>
               <td>${r.parcela}ª</td>
               <td>${formatDate(r.vencimento)}</td>
               <td>R$ ${numero(r.valor)}</td>
+              <td>R$ ${numero(pago)}</td>
               <td>${statusBadge(statusEfetivo(r))}</td>
               <td class="acoes">
-                ${statusEfetivo(r) !== 'pago' ? `<button class="secondary" onclick="App.receber('${r.id}')">Receber</button>` : `<button class="secondary" onclick="App.reverter('${r.id}')">Reverter</button>`}
+                ${saldo > 0 ? `<button class="secondary" onclick="App.abrirModalPagamento('${r.id}')">Receber</button>` : ''}
+                ${(r.pagamentos || []).length > 0 ? `<button class="secondary" onclick="App.abrirModalRecibos('${r.id}')">Recibos</button>` : ''}
+                ${(r.pagamentos || []).length > 0 ? `<button class="secondary" onclick="App.estornarPagamento('${r.id}')">Estornar</button>` : ''}
               </td>
             </tr>`;
           }).join('')}
@@ -395,28 +426,145 @@ const App = {
     `;
   },
 
-  async receber(id) {
-    const receber = DB.get('receber.json');
-    const r = receber.find(x => x.id === id);
+  abrirModalPagamento(id) {
+    const r = DB.get('receber.json').find(x => x.id === id);
     if (!r) return;
-    r.status = 'pago';
-    r.dataRecebimento = hojeISO();
+    const aluno = DB.get('alunos.json').find(a => a.id === r.alunoId) || {};
+    const saldo = Math.round((r.valor - valorPagoDe(r)) * 100) / 100;
+    this._pagamentoR = r;
+    this.abrirModal(`
+      <h2 style="margin-bottom:12px; color:#1e3a8a;">Receber pagamento</h2>
+      <p><strong>Aluno:</strong> ${esc(aluno.nome || '—')} ${aluno.codigo ? `(${esc(aluno.codigo)})` : ''}</p>
+      <p><strong>Referente:</strong> ${r.tipo === 'material' ? 'Material' : 'Mensalidade'} — ${r.parcela}ª parcela</p>
+      <p><strong>Vencimento:</strong> ${formatDate(r.vencimento)}</p>
+      <p><strong>Valor total:</strong> R$ ${numero(r.valor)}</p>
+      <p><strong>Saldo restante:</strong> R$ ${numero(saldo)}</p>
+      <div class="form-row" style="margin-top:12px;">
+        <label>Valor a receber (R$)
+          <input type="number" id="pag-valor" step="0.01" min="0.01" max="${saldo}" value="${saldo}" />
+        </label>
+        <label>Data <input type="date" id="pag-data" value="${hojeISO()}" /></label>
+      </div>
+      <button class="primary" onclick="App.confirmarPagamento()">Confirmar pagamento</button>
+      <button class="secondary" onclick="App.fecharModal()">Cancelar</button>
+    `);
+  },
+
+  async confirmarPagamento() {
+    const r = this._pagamentoR;
+    if (!r) return;
+    const valor = parseFloat(document.getElementById('pag-valor').value);
+    const data = document.getElementById('pag-data').value;
+    const saldo = Math.round((r.valor - valorPagoDe(r)) * 100) / 100;
+    if (!valor || valor <= 0 || valor > saldo + 0.01) { alert('Valor inválido. O máximo é R$ ' + numero(saldo)); return; }
+
+    const receber = DB.get('receber.json');
+    const rec = receber.find(x => x.id === r.id);
+    if (!rec.pagamentos) rec.pagamentos = [];
+    const pagamento = { id: uid('pgto'), valor: Math.round(valor * 100) / 100, data: data || hojeISO() };
+    rec.pagamentos.push(pagamento);
+    const pago = valorPagoDe(rec);
+    rec.status = pago >= rec.valor ? 'pago' : 'parcial';
+    rec.dataRecebimento = data || hojeISO();
+
     try {
-      await DB.set('receber.json', receber, 'Baixa conta a receber');
+      await DB.set('receber.json', receber, 'Recebimento registrado');
       this.setStatus('Pagamento registrado ✓');
+      this.fecharModal();
       this.renderAll();
     } catch (e) { this.setStatus('Erro: ' + e.message, 'error'); }
   },
 
-  async reverter(id) {
-    const receber = DB.get('receber.json');
-    const r = receber.find(x => x.id === id);
+  abrirModalRecibos(id) {
+    const r = DB.get('receber.json').find(x => x.id === id);
     if (!r) return;
-    r.status = 'pendente';
-    delete r.dataRecebimento;
+    const aluno = DB.get('alunos.json').find(a => a.id === r.alunoId) || {};
+    const pagamentos = r.pagamentos || [];
+    this.abrirModal(`
+      <h2 style="margin-bottom:12px; color:#1e3a8a;">Recibos</h2>
+      <p><strong>Aluno:</strong> ${esc(aluno.nome || '—')}</p>
+      <p><strong>Referente:</strong> ${r.tipo === 'material' ? 'Material' : 'Mensalidade'} — ${r.parcela}ª parcela</p>
+      <hr />
+      ${pagamentos.map(p => `
+        <div class="recibo-item">
+          <span><strong>R$ ${numero(p.valor)}</strong> — ${formatDate(p.data)}</span>
+          <button class="primary" onclick="App.gerarRecibo('${r.id}','${p.id}')">Gerar PDF</button>
+        </div>`).join('')}
+    `);
+  },
+
+  gerarRecibo(receberId, pagamentoId) {
+    if (!window.jspdf) { alert('Biblioteca PDF ainda não carregada. Recarregue a página e tente novamente.'); return; }
+    const r = DB.get('receber.json').find(x => x.id === receberId);
+    const p = (r?.pagamentos || []).find(x => x.id === pagamentoId);
+    if (!r || !p) return;
+
+    const aluno = DB.get('alunos.json').find(a => a.id === r.alunoId) || {};
+    const resp = aluno.responsavel || {};
+    const saldo = r.valor - valorPagoDe(r);
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const W = doc.internal.pageSize.getWidth();
+    let y = 0;
+
+    // Cabeçalho
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text('RECIBO DE PAGAMENTO', W / 2, 20, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.text('Financeiro Conecta', W / 2, 28, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text('Recibo Nº: ' + p.id, W / 2, 35, { align: 'center' });
+
+    doc.setDrawColor(200, 200, 200);
+    doc.line(14, 40, W - 14, 40);
+
+    y = 52;
+    const linha = (label, valor) => {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.text(label + ':', 16, y);
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(valor || '—'), 80, y);
+      y += 7;
+    };
+
+    linha('Data do pagamento', formatDate(p.data));
+    linha('Valor recebido', 'R$ ' + numero(p.valor));
+    linha('Referente', (r.tipo === 'material' ? 'Taxa de Material' : 'Mensalidade') + ' - ' + r.parcela + 'ª parcela');
+    linha('Vencimento', formatDate(r.vencimento));
+    linha('Aluno', aluno.nome + (aluno.codigo ? ' (' + aluno.codigo + ')' : ''));
+    linha('Responsável', resp.nome);
+    linha('CPF', resp.cpf);
+    linha('Valor total da parcela', 'R$ ' + numero(r.valor));
+    linha('Saldo restante', 'R$ ' + numero(saldo));
+
+    y += 10;
+    doc.setDrawColor(200, 200, 200);
+    doc.line(16, y, 90, y);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Assinatura', 16, y + 6);
+
+    doc.setFontSize(8);
+    doc.text('Documento gerado em ' + formatDate(hojeISO()) + ' às ' + new Date().toLocaleTimeString('pt-BR'), W / 2, 280, { align: 'center' });
+
+    const blobUrl = doc.output('bloburl');
+    this.abrirModal(`<h2 style="margin-bottom:12px; color:#1e3a8a;">Recibo (PDF)</h2><iframe src="${blobUrl}"></iframe>`, true);
+  },
+
+  async estornarPagamento(id) {
+    const r = DB.get('receber.json').find(x => x.id === id);
+    if (!r || !r.pagamentos || r.pagamentos.length === 0) return;
+    if (!confirm('Estornar o último pagamento recebido?')) return;
+    r.pagamentos.pop();
+    const pago = valorPagoDe(r);
+    r.status = pago >= r.valor ? 'pago' : (pago > 0 ? 'parcial' : 'pendente');
+    if (pago === 0) delete r.dataRecebimento;
     try {
-      await DB.set('receber.json', receber, 'Reverte baixa');
-      this.setStatus('Baixa revertida.');
+      await DB.set('receber.json', DB.get('receber.json'), 'Estorna pagamento');
+      this.setStatus('Pagamento estornado.');
       this.renderAll();
     } catch (e) { this.setStatus('Erro: ' + e.message, 'error'); }
   },
@@ -432,6 +580,7 @@ const App = {
         <input type="hidden" id="al-id" />
         <h3>Dados do aluno</h3>
         <div class="form-row">
+          <label>Código <input id="al-codigo" placeholder="Automático" /></label>
           <label>Nome completo <input id="al-nome" /></label>
           <label>E-mail <input id="al-email" /></label>
         </div>
@@ -480,7 +629,7 @@ const App = {
     return `
       <div class="aluno-card">
         <div class="topo">
-          <h3>${esc(a.nome)}</h3>
+          <h3>${esc(a.nome)} <span class="badge codigo">${esc(a.codigo || 'sem código')}</span></h3>
           <div>
             <button class="secondary" onclick="App.editarAluno('${a.id}')">Editar</button>
             <button class="secondary" onclick="App.excluirAluno('${a.id}')">Excluir</button>
@@ -507,8 +656,12 @@ const App = {
     const nome = document.getElementById('al-nome').value.trim();
     if (!nome) { this.setStatus('Informe o nome do aluno.', 'warn'); return; }
 
+    let codigo = document.getElementById('al-codigo').value.trim();
+    if (!codigo) codigo = proximoCodigoAluno();
+
     const dados = {
       id: id || uid('a'),
+      codigo,
       nome,
       email: document.getElementById('al-email').value.trim(),
       telefone1: document.getElementById('al-fone1').value.trim(),
@@ -547,6 +700,7 @@ const App = {
     const a = DB.get('alunos.json').find(x => x.id === id);
     if (!a) return;
     document.getElementById('al-id').value = a.id;
+    document.getElementById('al-codigo').value = a.codigo || '';
     document.getElementById('al-nome').value = a.nome;
     document.getElementById('al-email').value = a.email || '';
     document.getElementById('al-fone1').value = a.telefone1 || a.telefone || '';
@@ -566,7 +720,7 @@ const App = {
 
   cancelarEdicaoAluno() {
     document.getElementById('al-id').value = '';
-    ['al-nome','al-email','al-fone1','al-fone2','al-aut-nome','al-aut-fone','al-resp-nome','al-resp-cpf','al-resp-fone','al-resp-email','al-resp-end']
+    ['al-codigo','al-nome','al-email','al-fone1','al-fone2','al-aut-nome','al-aut-fone','al-resp-nome','al-resp-cpf','al-resp-fone','al-resp-email','al-resp-end']
       .forEach(id => { document.getElementById(id).value = ''; });
     document.getElementById('al-resp-parentesco').value = 'Pai';
     document.getElementById('al-titulo').textContent = 'Novo';
@@ -676,7 +830,6 @@ const App = {
 
     const el = document.getElementById('matriculas-lista');
     if (!el) return;
-
     if (lista.length === 0) { el.innerHTML = '<p class="text-muted">Nenhuma matrícula encontrada.</p>'; return; }
 
     el.innerHTML = `
@@ -809,11 +962,248 @@ const App = {
     } catch (e) { this.setStatus('Erro: ' + e.message, 'error'); }
   },
 
+  // ==================== CADASTROS ====================
+  renderCadastros() {
+    const sec = document.getElementById('tab-cadastros');
+    const ativo = this.cadastroTipo;
+    sec.innerHTML = `
+      <div class="subtabs">
+        <button class="${ativo === 'fornecedores' ? 'primary' : 'secondary'}" onclick="App.setCadastroTipo('fornecedores')">Fornecedores</button>
+        <button class="${ativo === 'colaboradores' ? 'primary' : 'secondary'}" onclick="App.setCadastroTipo('colaboradores')">Colaboradores</button>
+      </div>
+      <div id="cadastros-conteudo"></div>
+    `;
+    if (ativo === 'fornecedores') this.renderFornecedores();
+    else this.renderColaboradores();
+  },
+
+  setCadastroTipo(tipo) {
+    this.cadastroTipo = tipo;
+    this.renderCadastros();
+  },
+
+  // --- Fornecedores ---
+  renderFornecedores() {
+    const el = document.getElementById('cadastros-conteudo');
+    const fornecedores = DB.get('fornecedores.json');
+    el.innerHTML = `
+      <div class="card">
+        <h2><span id="forn-titulo">Novo</span> Fornecedor</h2>
+        <input type="hidden" id="forn-id" />
+        <div class="form-row">
+          <label>Nome <input id="forn-nome" /></label>
+          <label>CNPJ <input id="forn-cnpj" /></label>
+        </div>
+        <div class="form-row">
+          <label>E-mail <input id="forn-email" /></label>
+          <label>Telefone <input id="forn-telefone" /></label>
+        </div>
+        <div class="form-row">
+          <label>Endereço <input id="forn-end" /></label>
+          <label>Pessoa de contato <input id="forn-contato" /></label>
+        </div>
+        <button class="primary" id="btn-salvar-forn">Salvar fornecedor</button>
+        <button class="secondary" id="btn-cancelar-forn" style="display:none;">Cancelar edição</button>
+      </div>
+      <div class="card">
+        <h2>Fornecedores cadastrados</h2>
+        ${fornecedores.length === 0 ? '<p class="text-muted">Nenhum fornecedor cadastrado.</p>' : `
+          <table>
+            <thead><tr><th>Nome</th><th>CNPJ</th><th>Telefone</th><th>E-mail</th><th>Contato</th><th>Ações</th></tr></thead>
+            <tbody>
+              ${fornecedores.map(fn => `<tr>
+                <td>${esc(fn.nome)}</td>
+                <td>${esc(fn.cnpj || '—')}</td>
+                <td>${esc(fn.telefone || '—')}</td>
+                <td>${esc(fn.email || '—')}</td>
+                <td>${esc(fn.contato || '—')}</td>
+                <td class="acoes">
+                  <button class="secondary" onclick="App.editarFornecedor('${fn.id}')">Editar</button>
+                  <button class="secondary" onclick="App.excluirFornecedor('${fn.id}')">Excluir</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        `}
+      </div>
+    `;
+    document.getElementById('btn-salvar-forn').addEventListener('click', () => this.salvarFornecedor());
+    document.getElementById('btn-cancelar-forn').addEventListener('click', () => this.cancelarEdicaoFornecedor());
+  },
+
+  async salvarFornecedor() {
+    const id = document.getElementById('forn-id').value;
+    const nome = document.getElementById('forn-nome').value.trim();
+    if (!nome) { this.setStatus('Informe o nome do fornecedor.', 'warn'); return; }
+    const dados = {
+      id: id || uid('f'),
+      nome,
+      cnpj: document.getElementById('forn-cnpj').value.trim(),
+      email: document.getElementById('forn-email').value.trim(),
+      telefone: document.getElementById('forn-telefone').value.trim(),
+      endereco: document.getElementById('forn-end').value.trim(),
+      contato: document.getElementById('forn-contato').value.trim()
+    };
+    const lista = DB.get('fornecedores.json');
+    if (id) {
+      const i = lista.findIndex(x => x.id === id);
+      if (i === -1) return;
+      lista[i] = dados;
+    } else {
+      lista.push(dados);
+    }
+    try {
+      await DB.set('fornecedores.json', lista, id ? 'Edita fornecedor' : 'Adiciona fornecedor');
+      this.setStatus(id ? 'Fornecedor atualizado ✓' : 'Fornecedor salvo ✓');
+      this.renderAll();
+    } catch (e) { this.setStatus('Erro: ' + e.message, 'error'); }
+  },
+
+  editarFornecedor(id) {
+    const fn = DB.get('fornecedores.json').find(x => x.id === id);
+    if (!fn) return;
+    document.getElementById('forn-id').value = fn.id;
+    document.getElementById('forn-nome').value = fn.nome;
+    document.getElementById('forn-cnpj').value = fn.cnpj || '';
+    document.getElementById('forn-email').value = fn.email || '';
+    document.getElementById('forn-telefone').value = fn.telefone || '';
+    document.getElementById('forn-end').value = fn.endereco || '';
+    document.getElementById('forn-contato').value = fn.contato || '';
+    document.getElementById('forn-titulo').textContent = 'Editar';
+    document.getElementById('btn-cancelar-forn').style.display = 'inline-block';
+  },
+
+  cancelarEdicaoFornecedor() {
+    document.getElementById('forn-id').value = '';
+    ['forn-nome','forn-cnpj','forn-email','forn-telefone','forn-end','forn-contato']
+      .forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('forn-titulo').textContent = 'Novo';
+    document.getElementById('btn-cancelar-forn').style.display = 'none';
+  },
+
+  async excluirFornecedor(id) {
+    if (!confirm('Excluir este fornecedor?')) return;
+    const lista = DB.get('fornecedores.json').filter(x => x.id !== id);
+    try {
+      await DB.set('fornecedores.json', lista, 'Exclui fornecedor');
+      this.setStatus('Fornecedor excluído.');
+      this.renderAll();
+    } catch (e) { this.setStatus('Erro: ' + e.message, 'error'); }
+  },
+
+  // --- Colaboradores ---
+  renderColaboradores() {
+    const el = document.getElementById('cadastros-conteudo');
+    const colaboradores = DB.get('colaboradores.json');
+    el.innerHTML = `
+      <div class="card">
+        <h2><span id="colab-titulo">Novo</span> Colaborador</h2>
+        <input type="hidden" id="colab-id" />
+        <div class="form-row">
+          <label>Nome <input id="colab-nome" /></label>
+          <label>Função <input id="colab-funcao" /></label>
+        </div>
+        <div class="form-row">
+          <label>E-mail <input id="colab-email" /></label>
+          <label>Telefone <input id="colab-telefone" /></label>
+        </div>
+        <div class="form-row">
+          <label>Endereço <input id="colab-end" /></label>
+          <label>Data de admissão <input type="date" id="colab-admissao" /></label>
+        </div>
+        <button class="primary" id="btn-salvar-colab">Salvar colaborador</button>
+        <button class="secondary" id="btn-cancelar-colab" style="display:none;">Cancelar edição</button>
+      </div>
+      <div class="card">
+        <h2>Colaboradores cadastrados</h2>
+        ${colaboradores.length === 0 ? '<p class="text-muted">Nenhum colaborador cadastrado.</p>' : `
+          <table>
+            <thead><tr><th>Nome</th><th>Função</th><th>Telefone</th><th>E-mail</th><th>Admissão</th><th>Ações</th></tr></thead>
+            <tbody>
+              ${colaboradores.map(c => `<tr>
+                <td>${esc(c.nome)}</td>
+                <td>${esc(c.funcao || '—')}</td>
+                <td>${esc(c.telefone || '—')}</td>
+                <td>${esc(c.email || '—')}</td>
+                <td>${formatDate(c.admissao)}</td>
+                <td class="acoes">
+                  <button class="secondary" onclick="App.editarColaborador('${c.id}')">Editar</button>
+                  <button class="secondary" onclick="App.excluirColaborador('${c.id}')">Excluir</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        `}
+      </div>
+    `;
+    document.getElementById('btn-salvar-colab').addEventListener('click', () => this.salvarColaborador());
+    document.getElementById('btn-cancelar-colab').addEventListener('click', () => this.cancelarEdicaoColaborador());
+  },
+
+  async salvarColaborador() {
+    const id = document.getElementById('colab-id').value;
+    const nome = document.getElementById('colab-nome').value.trim();
+    if (!nome) { this.setStatus('Informe o nome do colaborador.', 'warn'); return; }
+    const dados = {
+      id: id || uid('c'),
+      nome,
+      funcao: document.getElementById('colab-funcao').value.trim(),
+      email: document.getElementById('colab-email').value.trim(),
+      telefone: document.getElementById('colab-telefone').value.trim(),
+      endereco: document.getElementById('colab-end').value.trim(),
+      admissao: document.getElementById('colab-admissao').value
+    };
+    const lista = DB.get('colaboradores.json');
+    if (id) {
+      const i = lista.findIndex(x => x.id === id);
+      if (i === -1) return;
+      lista[i] = dados;
+    } else {
+      lista.push(dados);
+    }
+    try {
+      await DB.set('colaboradores.json', lista, id ? 'Edita colaborador' : 'Adiciona colaborador');
+      this.setStatus(id ? 'Colaborador atualizado ✓' : 'Colaborador salvo ✓');
+      this.renderAll();
+    } catch (e) { this.setStatus('Erro: ' + e.message, 'error'); }
+  },
+
+  editarColaborador(id) {
+    const c = DB.get('colaboradores.json').find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('colab-id').value = c.id;
+    document.getElementById('colab-nome').value = c.nome;
+    document.getElementById('colab-funcao').value = c.funcao || '';
+    document.getElementById('colab-email').value = c.email || '';
+    document.getElementById('colab-telefone').value = c.telefone || '';
+    document.getElementById('colab-end').value = c.endereco || '';
+    document.getElementById('colab-admissao').value = c.admissao || '';
+    document.getElementById('colab-titulo').textContent = 'Editar';
+    document.getElementById('btn-cancelar-colab').style.display = 'inline-block';
+  },
+
+  cancelarEdicaoColaborador() {
+    document.getElementById('colab-id').value = '';
+    ['colab-nome','colab-funcao','colab-email','colab-telefone','colab-end','colab-admissao']
+      .forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('colab-titulo').textContent = 'Novo';
+    document.getElementById('btn-cancelar-colab').style.display = 'none';
+  },
+
+  async excluirColaborador(id) {
+    if (!confirm('Excluir este colaborador?')) return;
+    const lista = DB.get('colaboradores.json').filter(x => x.id !== id);
+    try {
+      await DB.set('colaboradores.json', lista, 'Exclui colaborador');
+      this.setStatus('Colaborador excluído.');
+      this.renderAll();
+    } catch (e) { this.setStatus('Erro: ' + e.message, 'error'); }
+  },
+
   // ==================== RELATÓRIOS ====================
   renderRelatorios() {
     const sec = document.getElementById('tab-relatorios');
     const anoAtual = new Date().getFullYear();
-
     sec.innerHTML = `
       <div class="card">
         <h2>Relatórios</h2>
@@ -829,7 +1219,6 @@ const App = {
         <div id="rel-resultado"></div>
       </div>
     `;
-
     document.getElementById('btn-gerar-rel').addEventListener('click', () => this.gerarRelatorio());
     this.gerarRelatorio();
   },
@@ -844,8 +1233,8 @@ const App = {
 
     const totalRecebido = receber.filter(r => r.status === 'pago' && (r.dataRecebimento || r.vencimento).slice(0, 7) === chave).reduce((s, r) => s + r.valor, 0);
     const totalPago = pagar.filter(p => p.status === 'pago' && (p.dataPagamento || p.vencimento).slice(0, 7) === chave).reduce((s, p) => s + p.valor, 0);
-    const inadimplentes = receber.filter(r => r.status !== 'pago');
-    const totalInadimplencia = inadimplentes.reduce((s, r) => s + r.valor, 0);
+    const inadimplentes = receber.filter(r => statusEfetivo(r) !== 'pago');
+    const totalInadimplencia = inadimplentes.reduce((s, r) => s + (r.valor - valorPagoDe(r)), 0);
 
     const receitasPorTipo = { mensalidade: 0, material: 0 };
     receber.forEach(r => {
@@ -1168,14 +1557,21 @@ function numero(v) {
 function statusBadge(status) {
   const map = {
     pendente: '<span class="badge pendente">Pendente</span>',
+    parcial: '<span class="badge parcial">Parcial</span>',
     pago: '<span class="badge pago">Pago</span>',
     atrasado: '<span class="badge atrasado">Atrasado</span>'
   };
   return map[status] || esc(status);
 }
 
+function valorPagoDe(r) {
+  return (r.pagamentos || []).reduce((s, p) => s + p.valor, 0);
+}
+
 function statusEfetivo(r) {
-  if (r.status === 'pago') return 'pago';
+  const pago = valorPagoDe(r);
+  if (r.status === 'pago' || (pago > 0 && pago >= r.valor)) return 'pago';
+  if (pago > 0) return 'parcial';
   if (r.vencimento && r.vencimento < hojeISO()) return 'atrasado';
   return 'pendente';
 }
@@ -1256,6 +1652,16 @@ function mesesDisponiveis(registros) {
   const set = new Set();
   registros.forEach(r => { if (r.vencimento) set.add(r.vencimento.slice(0, 7)); });
   return Array.from(set).sort();
+}
+
+function proximoCodigoAluno() {
+  const alunos = DB.get('alunos.json');
+  let max = 0;
+  alunos.forEach(a => {
+    const m = (a.codigo || '').match(/(\d+)/);
+    if (m) max = Math.max(max, parseInt(m[1]));
+  });
+  return 'ALU-' + String(max + 1).padStart(4, '0');
 }
 
 document.addEventListener('DOMContentLoaded', () => App.init());
