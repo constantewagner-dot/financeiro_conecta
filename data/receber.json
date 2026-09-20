@@ -168,7 +168,15 @@
     "parcela": 1,
     "vencimento": "2026-09-28",
     "valor": 50,
-    "status": "pendente"
+    "status": "parcial",
+    "pagamentos": [
+      {
+        "id": "pgtomu93zfv8zfnt7",
+        "valor": 49.9,
+        "data": "2026-09-19"
+      }
+    ],
+    "dataRecebimento": "2026-09-19"
   },
   {
     "id": "rmu0kw3o60brht",
@@ -246,16 +254,11 @@
     "parcela": 1,
     "vencimento": "2026-09-10",
     "valor": 100,
-    "status": "pago",
+    "status": "parcial",
     "pagamentos": [
       {
         "id": "pgtomu93uqdc2i77l",
         "valor": 90,
-        "data": "2026-09-19"
-      },
-      {
-        "id": "pgtomu93w3lodgx8t",
-        "valor": 10,
         "data": "2026-09-19"
       }
     ],
