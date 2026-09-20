@@ -178,7 +178,15 @@
     "parcela": 1,
     "vencimento": "2026-09-10",
     "valor": 250,
-    "status": "pendente"
+    "status": "parcial",
+    "pagamentos": [
+      {
+        "id": "pgtomu93u1omg9u57",
+        "valor": 200,
+        "data": "2026-09-19"
+      }
+    ],
+    "dataRecebimento": "2026-09-19"
   },
   {
     "id": "rmu0kw3o6vi04j",
