@@ -1,0 +1,14 @@
+{
+  "receitas": [
+    "Mensalidade",
+    "Taxa de Material"
+  ],
+  "despesas": [
+    "Salários",
+    "Aluguel",
+    "Internet",
+    "Material",
+    "Impostos",
+    "Contabilidade"
+  ]
+}
