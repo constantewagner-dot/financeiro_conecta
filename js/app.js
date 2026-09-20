@@ -1,5 +1,5 @@
 // ============================================================
-// app.js — Financeiro Conecta (com Cadastros, baixa parcial e recibo PDF)
+// app.js — Financeiro Conecta (com validação de duplicidade e pesquisa)
 // ============================================================
 
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -16,6 +16,9 @@ const App = {
   filtrosPagar: { descricao: '', categoria: '', mes: '', status: '' },
   filtrosReceber: { aluno: '', tipo: '', mes: '', status: '' },
   filtrosMatriculas: { aluno: '', responsavel: '', tipo: '' },
+  filtroAlunos: '',
+  filtroFornecedores: '',
+  filtroColaboradores: '',
   cadastroTipo: 'fornecedores',
   _pagamentoR: null,
 
@@ -508,7 +511,6 @@ const App = {
     const W = doc.internal.pageSize.getWidth();
     let y = 0;
 
-    // Cabeçalho
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(18);
     doc.text('RECIBO DE PAGAMENTO', W / 2, 20, { align: 'center' });
@@ -572,7 +574,6 @@ const App = {
   // ==================== ALUNOS ====================
   renderAlunos() {
     const sec = document.getElementById('tab-alunos');
-    const alunos = DB.get('alunos.json');
 
     const form = `
       <div class="card">
@@ -613,14 +614,39 @@ const App = {
       </div>
     `;
 
-    const lista = alunos.length === 0
-      ? '<p class="text-muted">Nenhum aluno cadastrado.</p>'
-      : alunos.map(a => this.alunoCard(a)).join('');
-
-    sec.innerHTML = form + `<h2 style="margin-bottom:12px; color:#1e3a8a;">Alunos cadastrados</h2>${lista}`;
+    sec.innerHTML = form + `
+      <div class="card">
+        <h2>Alunos cadastrados</h2>
+        <div class="filtros">
+          <div class="campo" style="min-width:280px;">Pesquisar
+            <input id="filtro-alunos" value="${esc(this.filtroAlunos)}" placeholder="Nome do aluno ou responsável..." />
+          </div>
+        </div>
+        <div id="alunos-lista"></div>
+      </div>
+    `;
 
     document.getElementById('btn-salvar-aluno').addEventListener('click', () => this.salvarAluno());
     document.getElementById('btn-cancelar-aluno').addEventListener('click', () => this.cancelarEdicaoAluno());
+    document.getElementById('filtro-alunos').addEventListener('input', e => { this.filtroAlunos = e.target.value; this.renderAlunosLista(); });
+
+    this.renderAlunosLista();
+  },
+
+  renderAlunosLista() {
+    const q = normalizar(this.filtroAlunos);
+    let lista = DB.get('alunos.json');
+    if (q) {
+      lista = lista.filter(a =>
+        normalizar(a.nome).includes(q) ||
+        normalizar(a.responsavel?.nome).includes(q)
+      );
+    }
+    const el = document.getElementById('alunos-lista');
+    if (!el) return;
+    el.innerHTML = lista.length === 0
+      ? '<p class="text-muted">Nenhum aluno encontrado.</p>'
+      : lista.map(a => this.alunoCard(a)).join('');
   },
 
   alunoCard(a) {
@@ -681,6 +707,16 @@ const App = {
     };
 
     const alunos = DB.get('alunos.json');
+
+    // Validação de duplicidade (por nome)
+    const duplicado = alunos.find(a => a.id !== id && normalizar(a.nome) === normalizar(dados.nome));
+    if (duplicado) {
+      alert(`Já existe um aluno cadastrado com o nome "${duplicado.nome}".\nO cadastro foi carregado para edição.`);
+      this.setStatus('Cadastro duplicado — carregado para edição.', 'warn');
+      this.editarAluno(duplicado.id);
+      return;
+    }
+
     if (id) {
       const idx = alunos.findIndex(a => a.id === id);
       if (idx === -1) return;
@@ -985,7 +1021,6 @@ const App = {
   // --- Fornecedores ---
   renderFornecedores() {
     const el = document.getElementById('cadastros-conteudo');
-    const fornecedores = DB.get('fornecedores.json');
     el.innerHTML = `
       <div class="card">
         <h2><span id="forn-titulo">Novo</span> Fornecedor</h2>
@@ -1007,34 +1042,58 @@ const App = {
       </div>
       <div class="card">
         <h2>Fornecedores cadastrados</h2>
-        ${fornecedores.length === 0 ? '<p class="text-muted">Nenhum fornecedor cadastrado.</p>' : `
-          <table>
-            <thead><tr><th>Nome</th><th>CNPJ</th><th>Telefone</th><th>E-mail</th><th>Contato</th><th>Ações</th></tr></thead>
-            <tbody>
-              ${fornecedores.map(fn => `<tr>
-                <td>${esc(fn.nome)}</td>
-                <td>${esc(fn.cnpj || '—')}</td>
-                <td>${esc(fn.telefone || '—')}</td>
-                <td>${esc(fn.email || '—')}</td>
-                <td>${esc(fn.contato || '—')}</td>
-                <td class="acoes">
-                  <button class="secondary" onclick="App.editarFornecedor('${fn.id}')">Editar</button>
-                  <button class="secondary" onclick="App.excluirFornecedor('${fn.id}')">Excluir</button>
-                </td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        `}
+        <div class="filtros">
+          <div class="campo" style="min-width:280px;">Pesquisar
+            <input id="filtro-forn" value="${esc(this.filtroFornecedores)}" placeholder="Nome, CNPJ ou contato..." />
+          </div>
+        </div>
+        <div id="fornecedores-lista"></div>
       </div>
     `;
     document.getElementById('btn-salvar-forn').addEventListener('click', () => this.salvarFornecedor());
     document.getElementById('btn-cancelar-forn').addEventListener('click', () => this.cancelarEdicaoFornecedor());
+    document.getElementById('filtro-forn').addEventListener('input', e => { this.filtroFornecedores = e.target.value; this.renderFornecedoresLista(); });
+
+    this.renderFornecedoresLista();
+  },
+
+  renderFornecedoresLista() {
+    const q = normalizar(this.filtroFornecedores);
+    let lista = DB.get('fornecedores.json');
+    if (q) {
+      lista = lista.filter(fn =>
+        normalizar(fn.nome).includes(q) ||
+        normalizar(fn.cnpj).includes(q) ||
+        normalizar(fn.contato).includes(q)
+      );
+    }
+    const el = document.getElementById('fornecedores-lista');
+    if (!el) return;
+    el.innerHTML = lista.length === 0 ? '<p class="text-muted">Nenhum fornecedor encontrado.</p>' : `
+      <table>
+        <thead><tr><th>Nome</th><th>CNPJ</th><th>Telefone</th><th>E-mail</th><th>Contato</th><th>Ações</th></tr></thead>
+        <tbody>
+          ${lista.map(fn => `<tr>
+            <td>${esc(fn.nome)}</td>
+            <td>${esc(fn.cnpj || '—')}</td>
+            <td>${esc(fn.telefone || '—')}</td>
+            <td>${esc(fn.email || '—')}</td>
+            <td>${esc(fn.contato || '—')}</td>
+            <td class="acoes">
+              <button class="secondary" onclick="App.editarFornecedor('${fn.id}')">Editar</button>
+              <button class="secondary" onclick="App.excluirFornecedor('${fn.id}')">Excluir</button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    `;
   },
 
   async salvarFornecedor() {
     const id = document.getElementById('forn-id').value;
     const nome = document.getElementById('forn-nome').value.trim();
     if (!nome) { this.setStatus('Informe o nome do fornecedor.', 'warn'); return; }
+
     const dados = {
       id: id || uid('f'),
       nome,
@@ -1044,7 +1103,22 @@ const App = {
       endereco: document.getElementById('forn-end').value.trim(),
       contato: document.getElementById('forn-contato').value.trim()
     };
+
     const lista = DB.get('fornecedores.json');
+
+    // Validação de duplicidade (CNPJ ou nome)
+    const cnpjNorm = (dados.cnpj || '').replace(/\D/g, '');
+    const duplicado = lista.find(x => x.id !== id && (
+      (cnpjNorm && (x.cnpj || '').replace(/\D/g, '') === cnpjNorm) ||
+      normalizar(x.nome) === normalizar(dados.nome)
+    ));
+    if (duplicado) {
+      alert(`Já existe um fornecedor cadastrado com esse ${cnpjNorm && (duplicado.cnpj || '').replace(/\D/g, '') === cnpjNorm ? 'CNPJ' : 'nome'}.\nO cadastro foi carregado para edição.`);
+      this.setStatus('Cadastro duplicado — carregado para edição.', 'warn');
+      this.editarFornecedor(duplicado.id);
+      return;
+    }
+
     if (id) {
       const i = lista.findIndex(x => x.id === id);
       if (i === -1) return;
@@ -1071,6 +1145,7 @@ const App = {
     document.getElementById('forn-contato').value = fn.contato || '';
     document.getElementById('forn-titulo').textContent = 'Editar';
     document.getElementById('btn-cancelar-forn').style.display = 'inline-block';
+    document.getElementById('btn-salvar-forn').scrollIntoView({ behavior: 'smooth', block: 'center' });
   },
 
   cancelarEdicaoFornecedor() {
@@ -1094,7 +1169,6 @@ const App = {
   // --- Colaboradores ---
   renderColaboradores() {
     const el = document.getElementById('cadastros-conteudo');
-    const colaboradores = DB.get('colaboradores.json');
     el.innerHTML = `
       <div class="card">
         <h2><span id="colab-titulo">Novo</span> Colaborador</h2>
@@ -1116,34 +1190,58 @@ const App = {
       </div>
       <div class="card">
         <h2>Colaboradores cadastrados</h2>
-        ${colaboradores.length === 0 ? '<p class="text-muted">Nenhum colaborador cadastrado.</p>' : `
-          <table>
-            <thead><tr><th>Nome</th><th>Função</th><th>Telefone</th><th>E-mail</th><th>Admissão</th><th>Ações</th></tr></thead>
-            <tbody>
-              ${colaboradores.map(c => `<tr>
-                <td>${esc(c.nome)}</td>
-                <td>${esc(c.funcao || '—')}</td>
-                <td>${esc(c.telefone || '—')}</td>
-                <td>${esc(c.email || '—')}</td>
-                <td>${formatDate(c.admissao)}</td>
-                <td class="acoes">
-                  <button class="secondary" onclick="App.editarColaborador('${c.id}')">Editar</button>
-                  <button class="secondary" onclick="App.excluirColaborador('${c.id}')">Excluir</button>
-                </td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        `}
+        <div class="filtros">
+          <div class="campo" style="min-width:280px;">Pesquisar
+            <input id="filtro-colab" value="${esc(this.filtroColaboradores)}" placeholder="Nome, função ou e-mail..." />
+          </div>
+        </div>
+        <div id="colaboradores-lista"></div>
       </div>
     `;
     document.getElementById('btn-salvar-colab').addEventListener('click', () => this.salvarColaborador());
     document.getElementById('btn-cancelar-colab').addEventListener('click', () => this.cancelarEdicaoColaborador());
+    document.getElementById('filtro-colab').addEventListener('input', e => { this.filtroColaboradores = e.target.value; this.renderColaboradoresLista(); });
+
+    this.renderColaboradoresLista();
+  },
+
+  renderColaboradoresLista() {
+    const q = normalizar(this.filtroColaboradores);
+    let lista = DB.get('colaboradores.json');
+    if (q) {
+      lista = lista.filter(c =>
+        normalizar(c.nome).includes(q) ||
+        normalizar(c.funcao).includes(q) ||
+        normalizar(c.email).includes(q)
+      );
+    }
+    const el = document.getElementById('colaboradores-lista');
+    if (!el) return;
+    el.innerHTML = lista.length === 0 ? '<p class="text-muted">Nenhum colaborador encontrado.</p>' : `
+      <table>
+        <thead><tr><th>Nome</th><th>Função</th><th>Telefone</th><th>E-mail</th><th>Admissão</th><th>Ações</th></tr></thead>
+        <tbody>
+          ${lista.map(c => `<tr>
+            <td>${esc(c.nome)}</td>
+            <td>${esc(c.funcao || '—')}</td>
+            <td>${esc(c.telefone || '—')}</td>
+            <td>${esc(c.email || '—')}</td>
+            <td>${formatDate(c.admissao)}</td>
+            <td class="acoes">
+              <button class="secondary" onclick="App.editarColaborador('${c.id}')">Editar</button>
+              <button class="secondary" onclick="App.excluirColaborador('${c.id}')">Excluir</button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    `;
   },
 
   async salvarColaborador() {
     const id = document.getElementById('colab-id').value;
     const nome = document.getElementById('colab-nome').value.trim();
     if (!nome) { this.setStatus('Informe o nome do colaborador.', 'warn'); return; }
+
     const dados = {
       id: id || uid('c'),
       nome,
@@ -1153,7 +1251,22 @@ const App = {
       endereco: document.getElementById('colab-end').value.trim(),
       admissao: document.getElementById('colab-admissao').value
     };
+
     const lista = DB.get('colaboradores.json');
+
+    // Validação de duplicidade (nome ou e-mail)
+    const duplicado = lista.find(x => x.id !== id && (
+      normalizar(x.nome) === normalizar(dados.nome) ||
+      (dados.email && normalizar(x.email) === normalizar(dados.email))
+    ));
+    if (duplicado) {
+      const porEmail = dados.email && normalizar(duplicado.email) === normalizar(dados.email);
+      alert(`Já existe um colaborador cadastrado com esse ${porEmail ? 'e-mail' : 'nome'}.\nO cadastro foi carregado para edição.`);
+      this.setStatus('Cadastro duplicado — carregado para edição.', 'warn');
+      this.editarColaborador(duplicado.id);
+      return;
+    }
+
     if (id) {
       const i = lista.findIndex(x => x.id === id);
       if (i === -1) return;
@@ -1180,6 +1293,7 @@ const App = {
     document.getElementById('colab-admissao').value = c.admissao || '';
     document.getElementById('colab-titulo').textContent = 'Editar';
     document.getElementById('btn-cancelar-colab').style.display = 'inline-block';
+    document.getElementById('btn-salvar-colab').scrollIntoView({ behavior: 'smooth', block: 'center' });
   },
 
   cancelarEdicaoColaborador() {
@@ -1533,6 +1647,14 @@ const App = {
 
 function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function normalizar(s) {
+  return String(s || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
 }
 
 function uid(prefix) {
