@@ -1,0 +1,15 @@
+{
+  "tiposContrato": [
+    "Mensal",
+    "Semestral",
+    "Anual",
+    "Por módulo"
+  ],
+  "modalidades": [
+    "Musicalização",
+    "Ballet",
+    "Violão",
+    "Piano",
+    "Canto"
+  ]
+}
